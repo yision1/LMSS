@@ -1,0 +1,19 @@
+plugins {
+    id 'net.neoforged.moddev'
+}
+
+repositories {
+    maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+}
+
+neoForge {
+    neoFormVersion = rootProject.neo_form_version
+}
+
+dependencies {
+    compileOnly 'org.spongepowered:mixin:0.8.5'
+    implementation project(':zstd-jni')
+    implementation project(':webp')
+    implementation 'com.electronwill.night-config:toml:3.8.3'
+}
+

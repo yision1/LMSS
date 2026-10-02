@@ -1,0 +1,41 @@
+plugins {
+    id 'net.neoforged.moddev'
+}
+
+neoForge {
+    version = rootProject.neo_version
+    runs {
+        client { client() }
+        server {
+            server()
+            programArgument '--nogui'
+            gameDirectory = project.file('run-server')
+        }
+    }
+    mods {
+        "${rootProject.mod_id}" { sourceSet sourceSets.main }
+    }
+}
+
+sourceSets.main.java.srcDir project(':common').file('src/main/java')
+sourceSets.main.resources.srcDir project(':common').file('src/main/resources')
+
+dependencies {
+    jarJar(implementation(project(':zstd-jni')))
+    jarJar(implementation(project(':webp')))
+    additionalRuntimeClasspath project(':zstd-jni')
+    additionalRuntimeClasspath project(':webp')
+    implementation 'com.electronwill.night-config:toml:3.8.3'
+}
+
+tasks.named('processResources') {
+    inputs.property 'mod_version', rootProject.mod_version
+    inputs.property 'mod_license', rootProject.mod_license
+    inputs.property 'mod_authors', rootProject.mod_authors
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand mod_id: rootProject.mod_id, mod_name: rootProject.mod_name,
+                mod_version: rootProject.mod_version, mod_license: rootProject.mod_license,
+                mod_authors: rootProject.mod_authors, mod_description: rootProject.mod_description,
+                neo_version: rootProject.neo_version
+    }
+}

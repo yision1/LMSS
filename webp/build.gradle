@@ -1,0 +1,45 @@
+plugins {
+    id 'java-library'
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    nativePayload {
+        canBeConsumed = false
+        transitive = false
+    }
+}
+
+dependencies {
+    nativePayload 'com.github.usefulness:webp-imageio:0.10.0'
+}
+
+def prepareNatives = tasks.register('prepareNatives', Sync) {
+    from({ zipTree(configurations.nativePayload.singleFile) }) {
+        include 'native/Windows/x86_64/**', 'native/Mac/x86_64/**', 'native/Mac/aarch64/**',
+                'native/Linux/x86_64/**', 'native/Linux/aarch64/**'
+        into 'META-INF/lmss-webp'
+    }
+    from({ zipTree(configurations.nativePayload.singleFile) }) {
+        include 'LICENSE', 'NOTICE'
+        into 'META-INF/licenses/webp-imageio'
+    }
+    into layout.buildDirectory.dir('generated/nativeResources')
+}
+
+sourceSets.main.resources.srcDir prepareNatives
+
+tasks.named('processResources') {
+    dependsOn tasks.named('compileJava')
+    from(tasks.named('compileJava').flatMap { it.destinationDirectory }) {
+        include 'com/luciad/imageio/webp/**'
+        into 'META-INF/lmss-webp/classes'
+    }
+}
+
+tasks.named('jar') {
+    exclude 'com/luciad/imageio/webp/**'
+}

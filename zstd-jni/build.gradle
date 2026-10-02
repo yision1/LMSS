@@ -1,0 +1,27 @@
+plugins {
+    id 'java-library'
+}
+
+group = 'com.github.luben'
+version = '1.5.7-14'
+base.archivesName = 'zstd-jni'
+
+def preparePayload = tasks.register('preparePayload', Sync) {
+    from({ zipTree(rootProject.configurations.zstdNativePayload.singleFile) }) {
+        include 'com/**', 'META-INF/**', 'module-info.class',
+                'win/amd64/**', 'linux/amd64/**', 'linux/aarch64/**',
+                'darwin/x86_64/**', 'darwin/aarch64/**'
+        exclude 'META-INF/MANIFEST.MF'
+    }
+    into layout.buildDirectory.dir('generated/payload')
+}
+
+sourceSets.main.output.classesDirs.from(preparePayload)
+
+tasks.named('jar') {
+    manifest {
+        attributes 'Implementation-Title': 'zstd-jni',
+                'Implementation-Version': project.version,
+                'Implementation-Vendor': 'com.github.luben'
+    }
+}

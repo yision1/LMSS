@@ -1,0 +1,35 @@
+plugins {
+    id 'net.neoforged.moddev' version '2.0.116' apply false
+    id 'fabric-loom' version '1.9.2' apply false
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    zstdNativePayload {
+        canBeConsumed = false
+        transitive = false
+    }
+}
+
+dependencies {
+    zstdNativePayload 'com.github.luben:zstd-jni:1.5.7-14'
+}
+
+subprojects {
+    version = rootProject.mod_version
+    group = rootProject.mod_group_id
+    plugins.withId('java') {
+        base.archivesName = "${rootProject.mod_id}-${project.name}"
+        java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+        tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+        if (project.name in ['neoforge', 'fabric']) {
+            tasks.withType(Jar).configureEach {
+                from(rootProject.file('LICENSE.txt'))
+                from(rootProject.file('TEMPLATE_LICENSE.txt'))
+            }
+        }
+    }
+}
